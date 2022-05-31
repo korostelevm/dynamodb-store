@@ -39,12 +39,12 @@ beforeAll(async () => {
   return dynamoService.createTable(params).promise();
 });
 
-afterAll(async () => {
-  const params = {
-    TableName: TEST_OPTIONS.table.name,
-  };
-  return dynamoService.deleteTable(params).promise();
-});
+// afterAll(async () => {
+//   const params = {
+//     TableName: TEST_OPTIONS.table.name,
+//   };
+//   return dynamoService.deleteTable(params).promise();
+// });
 
 describe('DynamoDBStore', () => {
   it('should create a store and a new table', () =>
@@ -76,6 +76,30 @@ describe('DynamoDBStore', () => {
   it('should create a store using an existing table', () =>
     new Promise((resolve, reject) => {
       const store = new DynamoDBStore(TEST_OPTIONS, (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+      expect(store).toBeDefined();
+    }));
+
+  it('should create a store using an existing table when use existing flag is set', () =>
+    new Promise((resolve, reject) => {
+      const store = new DynamoDBStore({
+        table: {
+          useExistingTable:true,
+          name: 'test-sessions',
+          hashKey: 'test-sessionId',
+          hashPrefix: 'test:',
+        },
+        dynamoConfig: {
+          endpoint: process.env.AWS_DYNAMO_ENDPOINT,
+          maxRetries: 0,
+          httpOptions: {
+            connectTimeout: 1000,
+          },
+        },
+        touchInterval: 0,
+      }, (err) => {
         if (err) reject(err);
         else resolve();
       });
